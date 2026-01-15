@@ -1,0 +1,260 @@
+import { DollarSign, FileText, Lightbulb, AlertCircle, Clock, CheckCircle, ArrowRight, TrendingUp } from 'lucide-react';
+import { Badge } from '@/app/components/ui/badge';
+
+interface RecommendationCardProps {
+  title: string;
+  description: string;
+  priority: 'HIGH PRIORITY' | 'MEDIUM PRIORITY' | 'LOW PRIORITY';
+  confidence: string;
+  projectedImpact: string;
+  implementationTime: string;
+  keyDetails: string[];
+  recommendedActions: string[];
+  icon: 'dollar' | 'file';
+  onImplement: () => void;
+  onViewDetails: () => void;
+  onDismiss: () => void;
+}
+
+function RecommendationCard({
+  title,
+  description,
+  priority,
+  confidence,
+  projectedImpact,
+  implementationTime,
+  keyDetails,
+  recommendedActions,
+  icon,
+  onImplement,
+  onViewDetails,
+  onDismiss
+}: RecommendationCardProps) {
+  const Icon = icon === 'dollar' ? DollarSign : FileText;
+  const priorityColors = {
+    'HIGH PRIORITY': 'bg-red-500 text-white',
+    'MEDIUM PRIORITY': 'bg-orange-500 text-white',
+    'LOW PRIORITY': 'bg-blue-500 text-white'
+  };
+  
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+      {/* Header */}
+      <div className="flex items-start gap-4 mb-6">
+        <div className="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-7 h-7 text-blue-600" strokeWidth={2.5} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Badge className={`${priorityColors[priority]} text-xs font-semibold px-3 py-1`}>
+                {priority}
+              </Badge>
+              <Badge className="bg-green-500 text-white text-xs font-semibold px-3 py-1">
+                {confidence}
+              </Badge>
+            </div>
+          </div>
+          <p className="text-gray-600">{description}</p>
+        </div>
+      </div>
+
+      {/* Metrics */}
+      <div className="grid grid-cols-2 gap-6 mb-6 pb-6 border-b border-gray-100">
+        <div className="flex items-start gap-3">
+          <TrendingUp className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Projected Impact</p>
+            <p className="text-lg font-semibold text-gray-900">{projectedImpact}</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <Clock className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Implementation Time</p>
+            <p className="text-lg font-semibold text-gray-900">{implementationTime}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Details */}
+      <div className="mb-6">
+        <h4 className="text-sm font-semibold text-gray-900 mb-3">Key Details:</h4>
+        <div className="space-y-2">
+          {keyDetails.map((detail, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-gray-700">{detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recommended Actions */}
+      <div className="mb-6">
+        <h4 className="text-sm font-semibold text-gray-900 mb-3">Recommended Actions:</h4>
+        <div className="space-y-2">
+          {recommendedActions.map((action, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <ArrowRight className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-gray-700">{action}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-3">
+        <button 
+          onClick={onImplement}
+          className="flex-1 bg-[#6366f1] hover:bg-[#5558e3] text-white px-6 py-3 rounded-lg font-medium transition-colors"
+        >
+          Implement Strategy
+        </button>
+        <button 
+          onClick={onViewDetails}
+          className="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-lg font-medium text-gray-700 transition-colors"
+        >
+          View Details
+        </button>
+        <button 
+          onClick={onDismiss}
+          className="px-6 py-3 text-gray-500 hover:text-gray-700 font-medium transition-colors"
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function AIInsights() {
+  const handleImplement = () => {
+    console.log('Implement strategy clicked');
+  };
+  
+  const handleViewDetails = () => {
+    console.log('View details clicked');
+  };
+  
+  const handleDismiss = () => {
+    console.log('Dismiss clicked');
+  };
+
+  const recommendations = [
+    {
+      title: 'Early Payment Incentive',
+      description: 'Offer 2% discount for early payment on high-value invoices',
+      priority: 'HIGH PRIORITY' as const,
+      confidence: '89% Confidence',
+      projectedImpact: '$425,000',
+      implementationTime: '7-10 days',
+      icon: 'dollar' as const,
+      keyDetails: [
+        'Target invoices: INV-2024-001 ($125k), INV-2024-003 ($245k), INV-2024-005 ($198k)',
+        'Expected cost: $11,360 in discounts',
+        'Net benefit: $413,640 immediate cash inflow',
+        'Bridges critical Feb 5 shortfall gap'
+      ],
+      recommendedActions: [
+        'Send automated early payment offer emails',
+        'Follow up with account managers',
+        'Set up expedited payment processing'
+      ]
+    },
+    {
+      title: 'Invoice Factoring',
+      description: 'Factor high-risk overdue invoices to improve immediate liquidity',
+      priority: 'HIGH PRIORITY' as const,
+      confidence: '78% Confidence',
+      projectedImpact: '$350,000',
+      implementationTime: '3-5 days',
+      icon: 'file' as const,
+      keyDetails: [
+        'Target invoices: 8 overdue invoices totaling $425,000',
+        'Factoring rate: 82% advance (industry standard)',
+        'Immediate cash: $350,000 within 3 business days',
+        'Reduces at-risk receivables by 35%'
+      ],
+      recommendedActions: [
+        'Contact pre-approved factoring partners',
+        'Review invoice eligibility criteria',
+        'Prepare invoice documentation package'
+      ]
+    },
+    {
+      title: 'Payment Term Renegotiation',
+      description: 'Extend payment terms with key vendors to preserve cash',
+      priority: 'MEDIUM PRIORITY' as const,
+      confidence: '72% Confidence',
+      projectedImpact: '$280,000',
+      implementationTime: '14-21 days',
+      icon: 'dollar' as const,
+      keyDetails: [
+        'Target vendors: 5 suppliers with strong relationships',
+        'Current terms: Net 30, proposed: Net 60',
+        'Deferred payments: $280,000 over next 30 days',
+        'Maintains vendor relationships and creditworthiness'
+      ],
+      recommendedActions: [
+        'Schedule vendor relationship meetings',
+        'Prepare business case presentations',
+        'Negotiate gradual implementation timeline'
+      ]
+    }
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+              <Lightbulb className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <h3 className="text-sm font-medium text-blue-900 mb-1">AI Recommendations</h3>
+          <p className="text-3xl font-bold text-blue-900 mb-1">3 Active</p>
+          <p className="text-sm text-blue-700">Updated 5 minutes ago</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <h3 className="text-sm font-medium text-green-900 mb-1">Total Potential Impact</h3>
+          <p className="text-3xl font-bold text-green-900 mb-1">$1,055,000</p>
+          <p className="text-sm text-green-700">Across all strategies</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-6 border border-red-200">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 rounded-xl bg-red-500 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <h3 className="text-sm font-medium text-red-900 mb-1">High Priority Actions</h3>
+          <p className="text-3xl font-bold text-red-900 mb-1">2 Urgent</p>
+          <p className="text-sm text-red-700">Require immediate attention</p>
+        </div>
+      </div>
+
+      {/* Recommendation Cards */}
+      <div className="space-y-6">
+        {recommendations.map((rec, index) => (
+          <RecommendationCard
+            key={index}
+            {...rec}
+            onImplement={handleImplement}
+            onViewDetails={handleViewDetails}
+            onDismiss={handleDismiss}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
