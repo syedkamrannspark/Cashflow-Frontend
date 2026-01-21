@@ -181,7 +181,7 @@ export function WorkflowDemo() {
     try {
       setAgents(prev => prev.map(a => a.name === 'Orchestrator' ? { ...a, status: 'active' } : a));
 
-      const response = await fetch('http://127.0.0.1:8000/api/v1/workflows/run', {
+      const response = await fetch('/api/v1/workflows/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })
