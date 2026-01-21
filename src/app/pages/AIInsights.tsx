@@ -163,37 +163,11 @@ export function AIInsights() {
     console.log('Dismiss clicked');
   };
 
-  // Mock recommendations as default/fallback, but we can prepend a dynamic one
-  const defaultRecommendations = [
-    {
-      title: 'Early Payment Incentive',
-      description: 'Offer 2% discount for early payment on high-value invoices',
-      priority: 'HIGH PRIORITY' as const,
-      confidence: '89% Confidence',
-      projectedImpact: '$425,000',
-      implementationTime: '7-10 days',
-      icon: 'dollar' as const,
-      keyDetails: [
-        'Target invoices: INV-2024-001 ($125k), INV-2024-003 ($245k), INV-2024-005 ($198k)',
-        'Expected cost: $11,360 in discounts',
-        'Net benefit: $413,640 immediate cash inflow',
-        'Bridges critical Feb 5 shortfall gap'
-      ],
-      recommendedActions: [
-        'Send automated early payment offer emails',
-        'Follow up with account managers',
-        'Set up expedited payment processing'
-      ]
-    },
-    // ... others
-  ];
-
-  // If backend returns a simple string, wrap it. 
-  // Ideally backend should return structured JSON.
+  // Dynamic recommendation from API
   const dynamicRecommendation = insightData ? {
     title: 'AI Analysis (Live Data)',
     description: typeof insightData === 'string' ? insightData.slice(0, 200) + '...' : 'Analysis based on current cash flow data.',
-    priority: 'MEDIUM PRIORITY' as const,
+    priority: 'MEDIUM PRIORITY' as 'HIGH PRIORITY' | 'MEDIUM PRIORITY' | 'LOW PRIORITY', // Explicit type to allow comparison
     confidence: '85% Confidence',
     projectedImpact: 'Variable',
     implementationTime: 'Immediate',
@@ -208,9 +182,23 @@ export function AIInsights() {
     ]
   } : null;
 
-  const recommendations = dynamicRecommendation
-    ? [dynamicRecommendation, ...defaultRecommendations]
-    : defaultRecommendations;
+  const recommendations = dynamicRecommendation ? [dynamicRecommendation] : [];
+
+  // Calculate Summary Metrics
+  const activeCount = recommendations.length;
+
+  // Helper to parse impact string if possible, else 0
+  const parseImpact = (impact: string) => {
+    const clean = impact.replace(/[^0-9.]/g, '');
+    return clean ? parseFloat(clean) : 0;
+  };
+
+  const totalImpactVal = recommendations.reduce((acc, rec) => acc + parseImpact(rec.projectedImpact), 0);
+  const totalImpactDisplay = totalImpactVal > 0
+    ? `$${totalImpactVal.toLocaleString()}`
+    : 'Variable';
+
+  const highPriorityCount = recommendations.filter(r => r.priority === 'HIGH PRIORITY').length;
 
   return (
     <div className="space-y-6">
@@ -223,7 +211,7 @@ export function AIInsights() {
             </div>
           </div>
           <h3 className="text-sm font-medium text-blue-900 mb-1">AI Recommendations</h3>
-          <p className="text-3xl font-bold text-blue-900 mb-1">{recommendations.length} Active</p>
+          <p className="text-3xl font-bold text-blue-900 mb-1">{activeCount} Active</p>
           <p className="text-sm text-blue-700">Updated just now</p>
         </div>
 
@@ -234,7 +222,7 @@ export function AIInsights() {
             </div>
           </div>
           <h3 className="text-sm font-medium text-green-900 mb-1">Total Potential Impact</h3>
-          <p className="text-3xl font-bold text-green-900 mb-1">$1,055,000</p>
+          <p className="text-3xl font-bold text-green-900 mb-1">{totalImpactDisplay}</p>
           <p className="text-sm text-green-700">Across all strategies</p>
         </div>
 
@@ -245,7 +233,7 @@ export function AIInsights() {
             </div>
           </div>
           <h3 className="text-sm font-medium text-red-900 mb-1">High Priority Actions</h3>
-          <p className="text-3xl font-bold text-red-900 mb-1">1 Urgent</p>
+          <p className="text-3xl font-bold text-red-900 mb-1">{highPriorityCount} Urgent</p>
           <p className="text-sm text-red-700">Require immediate attention</p>
         </div>
       </div>

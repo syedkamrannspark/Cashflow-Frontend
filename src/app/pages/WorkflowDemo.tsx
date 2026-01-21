@@ -150,12 +150,18 @@ export function WorkflowDemo() {
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [logs, setLogs] = useState<any[]>([]);
-  const [agents, setAgents] = useState([
-    { name: 'Orchestrator', role: 'Workflow Controller', status: 'idle' as const },
-    { name: 'Sensor', role: 'Data Collection', status: 'idle' as const },
-    { name: 'Analyzer', role: 'Data Analysis', status: 'idle' as const },
-    { name: 'Responder', role: 'Report Generator', status: 'idle' as const },
-    { name: 'Learner', role: 'Continuous Learning', status: 'idle' as const }
+  interface Agent {
+    name: string;
+    role: string;
+    status: 'active' | 'idle' | 'completed';
+  }
+
+  const [agents, setAgents] = useState<Agent[]>([
+    { name: 'Orchestrator', role: 'Workflow Controller', status: 'idle' },
+    { name: 'Sensor', role: 'Data Collection', status: 'idle' },
+    { name: 'Analyzer', role: 'Data Analysis', status: 'idle' },
+    { name: 'Responder', role: 'Report Generator', status: 'idle' },
+    { name: 'Learner', role: 'Continuous Learning', status: 'idle' }
   ]);
   const [metrics, setMetrics] = useState<any[]>([]);
   const [finalReport, setFinalReport] = useState<string | null>(null);
@@ -181,21 +187,62 @@ export function WorkflowDemo() {
         body: JSON.stringify({ prompt })
       });
 
-      const data = await response.json();
+      if (!response.body) throw new Error("No response body");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
 
-      // Mark all as completed for demo effect if successful
-      setAgents(prev => prev.map(a => ({ ...a, status: 'completed' })));
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      if (data.logs) {
-        setLogs(data.logs);
-      }
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n\n');
 
-      if (data.workflow_metrics) {
-        setMetrics(data.workflow_metrics);
-      }
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const jsonStr = line.slice(6);
+            if (!jsonStr) continue;
 
-      if (data.final_report) {
-        setFinalReport(data.final_report);
+            try {
+              const event = JSON.parse(jsonStr);
+
+              if (event.type === 'log') {
+                const logData = event.data;
+                setLogs(prev => [...prev, logData]);
+
+                // Update agent status based on log
+                setAgents(prev => prev.map(a => {
+                  if (a.name === logData.agent) {
+                    return { ...a, status: 'completed' }; // Mark current agent as complete
+                  }
+                  if (a.status === 'active' && a.name !== logData.agent) {
+                    // Mark previous active agent as complete if we moved to next one
+                    return { ...a, status: 'completed' };
+                  }
+                  return a;
+                }));
+
+                // Visualize next expected agent as active (simple heuristic)
+                if (logData.agent === 'Orchestrator') {
+                  setAgents(prev => prev.map(a => a.name === 'Sensor' ? { ...a, status: 'active' } : a));
+                } else if (logData.agent === 'Sensor') {
+                  setAgents(prev => prev.map(a => a.name === 'Analyzer' ? { ...a, status: 'active' } : a));
+                } else if (logData.agent === 'Analyzer') {
+                  setAgents(prev => prev.map(a => a.name === 'Responder' ? { ...a, status: 'active' } : a));
+                }
+
+              } else if (event.type === 'result') {
+                if (event.final_report) setFinalReport(event.final_report);
+                if (event.workflow_metrics) setMetrics(event.workflow_metrics);
+
+                // Mark all as completed
+                setAgents(prev => prev.map(a => ({ ...a, status: 'completed' })));
+              }
+            } catch (err) {
+              console.error("Error parsing SSE JSON", err);
+            }
+          }
+        }
       }
 
     } catch (error) {
@@ -203,10 +250,9 @@ export function WorkflowDemo() {
       setLogs(prev => [...prev, {
         agent: 'System',
         time: new Date().toLocaleTimeString(),
-        message: 'Failed to execute workflow. Please check backend connection.',
+        message: 'Failed to execute workflow or connection lost.',
         status: 'error'
       }]);
-      setAgents(prev => prev.map(a => ({ ...a, status: 'idle' })));
     } finally {
       setIsLoading(false);
     }
