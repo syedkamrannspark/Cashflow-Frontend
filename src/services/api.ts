@@ -39,7 +39,7 @@ export const getCashFlow = async () => {
 export const getInvoices = async (skip = 0, limit = 50, status = '') => {
     try {
         const query = status ? `&status=${status}` : '';
-        const response = await api.get(`/invoices?skip=${skip}&limit=${limit}${query}`);
+        const response = await api.get(`/invoices/?skip=${skip}&limit=${limit}${query}`);
         return response.data; // { items: [], total: 0, page: 1, limit: 50 }
     } catch (error) {
         console.error("Error fetching invoices:", error);
