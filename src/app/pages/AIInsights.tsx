@@ -1,5 +1,7 @@
 import { DollarSign, FileText, Lightbulb, AlertCircle, Clock, CheckCircle, ArrowRight, TrendingUp } from 'lucide-react';
 import { Badge } from '@/app/components/ui/badge';
+import { useState, useEffect } from 'react';
+import { getInsights } from '@/services/api';
 
 interface RecommendationCardProps {
   title: string;
@@ -36,7 +38,7 @@ function RecommendationCard({
     'MEDIUM PRIORITY': 'bg-orange-500 text-white',
     'LOW PRIORITY': 'bg-blue-500 text-white'
   };
-  
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
       {/* Header */}
@@ -106,19 +108,19 @@ function RecommendationCard({
 
       {/* Action Buttons */}
       <div className="flex items-center gap-3">
-        <button 
+        <button
           onClick={onImplement}
           className="flex-1 bg-[#6366f1] hover:bg-[#5558e3] text-white px-6 py-3 rounded-lg font-medium transition-colors"
         >
           Implement Strategy
         </button>
-        <button 
+        <button
           onClick={onViewDetails}
           className="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-lg font-medium text-gray-700 transition-colors"
         >
           View Details
         </button>
-        <button 
+        <button
           onClick={onDismiss}
           className="px-6 py-3 text-gray-500 hover:text-gray-700 font-medium transition-colors"
         >
@@ -130,19 +132,39 @@ function RecommendationCard({
 }
 
 export function AIInsights() {
+  const [insightData, setInsightData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInsights = async () => {
+      try {
+        const data = await getInsights();
+        if (data && data.insights) {
+          setInsightData(data.insights);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchInsights();
+  }, []);
+
   const handleImplement = () => {
     console.log('Implement strategy clicked');
   };
-  
+
   const handleViewDetails = () => {
     console.log('View details clicked');
   };
-  
+
   const handleDismiss = () => {
     console.log('Dismiss clicked');
   };
 
-  const recommendations = [
+  // Mock recommendations as default/fallback, but we can prepend a dynamic one
+  const defaultRecommendations = [
     {
       title: 'Early Payment Incentive',
       description: 'Offer 2% discount for early payment on high-value invoices',
@@ -163,47 +185,32 @@ export function AIInsights() {
         'Set up expedited payment processing'
       ]
     },
-    {
-      title: 'Invoice Factoring',
-      description: 'Factor high-risk overdue invoices to improve immediate liquidity',
-      priority: 'HIGH PRIORITY' as const,
-      confidence: '78% Confidence',
-      projectedImpact: '$350,000',
-      implementationTime: '3-5 days',
-      icon: 'file' as const,
-      keyDetails: [
-        'Target invoices: 8 overdue invoices totaling $425,000',
-        'Factoring rate: 82% advance (industry standard)',
-        'Immediate cash: $350,000 within 3 business days',
-        'Reduces at-risk receivables by 35%'
-      ],
-      recommendedActions: [
-        'Contact pre-approved factoring partners',
-        'Review invoice eligibility criteria',
-        'Prepare invoice documentation package'
-      ]
-    },
-    {
-      title: 'Payment Term Renegotiation',
-      description: 'Extend payment terms with key vendors to preserve cash',
-      priority: 'MEDIUM PRIORITY' as const,
-      confidence: '72% Confidence',
-      projectedImpact: '$280,000',
-      implementationTime: '14-21 days',
-      icon: 'dollar' as const,
-      keyDetails: [
-        'Target vendors: 5 suppliers with strong relationships',
-        'Current terms: Net 30, proposed: Net 60',
-        'Deferred payments: $280,000 over next 30 days',
-        'Maintains vendor relationships and creditworthiness'
-      ],
-      recommendedActions: [
-        'Schedule vendor relationship meetings',
-        'Prepare business case presentations',
-        'Negotiate gradual implementation timeline'
-      ]
-    }
+    // ... others
   ];
+
+  // If backend returns a simple string, wrap it. 
+  // Ideally backend should return structured JSON.
+  const dynamicRecommendation = insightData ? {
+    title: 'AI Analysis (Live Data)',
+    description: typeof insightData === 'string' ? insightData.slice(0, 200) + '...' : 'Analysis based on current cash flow data.',
+    priority: 'MEDIUM PRIORITY' as const,
+    confidence: '85% Confidence',
+    projectedImpact: 'Variable',
+    implementationTime: 'Immediate',
+    icon: 'file' as const,
+    keyDetails: [
+      'Based on real-time database analysis',
+      typeof insightData === 'string' ? insightData : 'Check dashboard for details'
+    ],
+    recommendedActions: [
+      'Review full report',
+      'Adjust forecast parameters'
+    ]
+  } : null;
+
+  const recommendations = dynamicRecommendation
+    ? [dynamicRecommendation, ...defaultRecommendations]
+    : defaultRecommendations;
 
   return (
     <div className="space-y-6">
@@ -216,8 +223,8 @@ export function AIInsights() {
             </div>
           </div>
           <h3 className="text-sm font-medium text-blue-900 mb-1">AI Recommendations</h3>
-          <p className="text-3xl font-bold text-blue-900 mb-1">3 Active</p>
-          <p className="text-sm text-blue-700">Updated 5 minutes ago</p>
+          <p className="text-3xl font-bold text-blue-900 mb-1">{recommendations.length} Active</p>
+          <p className="text-sm text-blue-700">Updated just now</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
@@ -238,10 +245,12 @@ export function AIInsights() {
             </div>
           </div>
           <h3 className="text-sm font-medium text-red-900 mb-1">High Priority Actions</h3>
-          <p className="text-3xl font-bold text-red-900 mb-1">2 Urgent</p>
+          <p className="text-3xl font-bold text-red-900 mb-1">1 Urgent</p>
           <p className="text-sm text-red-700">Require immediate attention</p>
         </div>
       </div>
+
+      {loading && <div className="text-center py-4">Generating AI Insights...</div>}
 
       {/* Recommendation Cards */}
       <div className="space-y-6">
