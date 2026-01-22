@@ -1,4 +1,5 @@
 import { TrendingUp, FileText, BarChart3, Lightbulb, Workflow } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 interface NavbarProps {
   currentPage: string;
@@ -21,8 +22,7 @@ export function Navbar({ currentPage, onNavigate }: NavbarProps) {
         <div className="h-[80px] flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div>
-              <h1 className="text-[28px] font-bold text-[#6366f1]">Guidant.AI</h1>
-              <p className="text-[11px] text-gray-500 -mt-1">Where Intelligence Meets Impact</p>
+              <img src={logo} alt="Guidant.AI" className="h-14 w-auto object-contain" />
             </div>
             <div className="h-8 w-px bg-gray-200" />
             <h2 className="text-[18px] font-semibold text-gray-700">Cash Flow Management Suite</h2>
@@ -38,7 +38,7 @@ export function Navbar({ currentPage, onNavigate }: NavbarProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Navigation tabs */}
       <div className="max-w-[1400px] mx-auto px-8 pb-4">
         <div className="flex gap-1">
@@ -46,11 +46,10 @@ export function Navbar({ currentPage, onNavigate }: NavbarProps) {
             <button
               key={name}
               onClick={() => onNavigate(name)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[15px] font-medium transition-all ${
-                currentPage === name
-                  ? 'bg-[#6366f1] text-white shadow-sm'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[15px] font-medium transition-all ${currentPage === name
+                ? 'bg-[#6366f1] text-white shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                }`}
             >
               <Icon className="w-4 h-4" />
               {name}
