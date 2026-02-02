@@ -56,3 +56,112 @@ export const getInsights = async () => {
         return { insights: "Unavailable" };
     }
 };
+
+// File/Document Upload API endpoints
+export const getUploadedFiles = async () => {
+    try {
+        const response = await api.get('/documents');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching uploaded files:", error);
+        throw error;
+    }
+};
+
+export const getDocumentById = async (documentId: number) => {
+    try {
+        const response = await api.get(`/documents/${documentId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching document:", error);
+        throw error;
+    }
+};
+
+export const saveMetadata = async (payload: {
+    document_id: number;
+    columns: Array<{
+        column_name: string;
+        data_type: string;
+        connection_key: string;
+        alias: string;
+        description: string;
+        is_target: boolean;
+        is_helper: boolean;
+    }>;
+}) => {
+    try {
+        const response = await api.post('/metadata/save', payload);
+        return response.data;
+    } catch (error) {
+        console.error("Error saving metadata:", error);
+        throw error;
+    }
+};
+
+export const processMetadata = async (documentId: number) => {
+    try {
+        const response = await api.post(`/documents/${documentId}/process`);
+        return response.data;
+    } catch (error) {
+        console.error("Error processing metadata:", error);
+        throw error;
+    }
+};
+
+export const deleteUploadedFile = async (documentId: number) => {
+    try {
+        const response = await api.delete(`/documents/${documentId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting document:", error);
+        throw error;
+    }
+};
+
+// File upload endpoints
+export const uploadSingleFile = async (file: File) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/documents/upload-single', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error uploading file:", error);
+        throw error;
+    }
+};
+
+export const uploadMultipleFiles = async (files: File[]) => {
+    try {
+        const formData = new FormData();
+        files.forEach((file) => {
+            formData.append('files', file);
+        });
+        const response = await api.post('/documents/upload-multiple', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error uploading multiple files:", error);
+        throw error;
+    }
+};
+
+export const checkDocumentByName = async (filename: string) => {
+    try {
+        const response = await api.get('/documents/check-by-name', {
+            params: { filename },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error checking document:", error);
+        throw error;
+    }
+};

@@ -94,7 +94,7 @@ export function Overview() {
       <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-gray-900">Cash Position Forecast</h3>
-          <p className="text-gray-600 mt-1">4 week projection with actual vs predicted values</p>
+          <p className="text-gray-600 mt-1">Last 4 weeks actuals + next 4 weeks forecast</p>
         </div>
         <ResponsiveContainer width="100%" height={350}>
           <LineChart data={forecast}>
@@ -107,7 +107,7 @@ export function Overview() {
             <YAxis
               tick={{ fontSize: 12 }}
               stroke="#666"
-              tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
+              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
             />
             <Tooltip
               formatter={(value: number) => formatCurrency(value)}
