@@ -1,20 +1,8 @@
-import { TrendingUp, FileText, BarChart3, Lightbulb, Workflow } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 import logo from '@/assets/logo.png';
+import { routeConfig } from '@/app/routes/routeConfig';
 
-interface NavbarProps {
-  currentPage: string;
-  onNavigate: (page: string) => void;
-}
-
-const pages = [
-  { name: 'Overview', icon: TrendingUp },
-  { name: 'Invoices', icon: FileText },
-  { name: 'Forecasting', icon: BarChart3 },
-  { name: 'AI Insights', icon: Lightbulb },
-  { name: 'Workflow Demo', icon: Workflow }
-];
-
-export function Navbar({ currentPage, onNavigate }: NavbarProps) {
+export function Navbar() {
   return (
     <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 shadow-sm">
       <div className="max-w-[1400px] mx-auto px-8">
@@ -42,18 +30,20 @@ export function Navbar({ currentPage, onNavigate }: NavbarProps) {
       {/* Navigation tabs */}
       <div className="max-w-[1400px] mx-auto px-8 pb-4">
         <div className="flex gap-1">
-          {pages.map(({ name, icon: Icon }) => (
-            <button
-              key={name}
-              onClick={() => onNavigate(name)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[15px] font-medium transition-all ${currentPage === name
-                ? 'bg-[#6366f1] text-white shadow-sm'
-                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                }`}
+          {routeConfig.map(({ name, path, icon: Icon }) => (
+            <NavLink
+              key={path}
+              to={path}
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-5 py-2.5 rounded-lg text-[15px] font-medium transition-all ${isActive
+                  ? 'bg-[#6366f1] text-white shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                }`
+              }
             >
               <Icon className="w-4 h-4" />
               {name}
-            </button>
+            </NavLink>
           ))}
         </div>
       </div>
